@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Real Snake Game</title>
+    <style>
+        body {
+            background: url('forest.jpg') no-repeat center center fixed;
+            background-size: cover;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+
+        canvas {
+            border: 2px solid white;
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="gameCanvas" width="400" height="400"></canvas>
+
+    <script>
+        const canvas = document.getElementById("gameCanvas");
+        const ctx = canvas.getContext("2d");
+
+        const gridSize = 20;
+
+        let snakeImage = new Image();
+        snakeImage.src = 'https://example.com/snake.png'; // Replace with the URL to your snake image
+
+        let dragon = [{ x: 0, y: 0 }];
+        let direction = "right";
+
+        function drawDragon() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            dragon.forEach(segment => {
+                drawSnakeSegment(segment.x, segment.y);
+            });
+        }
+
+        function drawSnakeSegment(x, y) {
+            ctx.drawImage(snakeImage, x * gridSize, y * gridSize, gridSize, gridSize);
+        }
+
+        function moveDragon() {
+            const head = { ...dragon[0] };
+
+            switch (direction) {
+                case "up":
+                    head.y -= 1;
+                    break;
+                case "down":
+                    head.y += 1;
+                    break;
+                case "left":
+                    head.x -= 1;
+                    break;
+                case "right":
+                    head.x += 1;
+                    break;
+            }
+
+            dragon.unshift(head);
+            dragon.pop();
+        }
+
+        function checkCollision() {
+            const head = dragon[0];
+
+            // Check collision with walls (for simplicity)
+            if (head.x < 0 || head.x >= canvas.width / gridSize || head.y < 0 || head.y >= canvas.height / gridSize) {
+                gameOver();
+            }
+
+            // Check collision with itself
+            for (let i = 1; i < dragon.length; i++) {
+                if (head.x === dragon[i].x && head.y === dragon[i].y) {
+                    gameOver();
+                }
+            }
+        }
+
+        function appleImage() {
+            const img = new Image();
+            img.src = 'https://example.com/apple.png'; // Replace with the URL to your apple image
+            return img;
+        }
+
+        let apple = generateApple();
+
+        function generateApple() {
+            return {
+                x: Math.floor(Math.random() * (canvas.width / gridSize)),
+                y: Math.floor(Math.random() * (canvas.height / gridSize))
+            };
+        }
+
+        function drawApple() {
+            const appleImg = appleImage();
+            ctx.drawImage(appleImg, apple.x * gridSize, apple.y * gridSize, gridSize, gridSize);
+        }
+
+        function checkAppleCollision() {
+            const head = dragon[0];
+
+            if (head.x === apple.x && head.y === apple.y) {
+                dragon.push({});
+                apple = generateApple();
+            }
+        }
+
+        function gameOver() {
+            alert("Game Over!");
+            dragon = [{ x: 0, y: 0 }];
+            direction = "right";
+        }
+
+        function gameLoop() {
+            moveDragon();
+            checkCollision();
+            checkAppleCollision();
+            drawDragon();
+            drawApple();
+        }
+
+        document.addEventListener("keydown", (event) => {
+            switch (event.key) {
+                case "w":
+                    direction = "up";
+                    break;
+                case "s":
+                    direction = "down";
+                    break;
+                case "a":
+                    direction = "left";
+                    break;
+                case "d":
+                    direction = "right";
+                    break;
+            }
+        });
+
+        setInterval(gameLoop, 200);
+    </script>
+
+</body>
+</html>
